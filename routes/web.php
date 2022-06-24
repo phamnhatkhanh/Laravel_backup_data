@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Log;
 Route::get('/', function () {
 
 
-   
-    return view('dashboard');
+
+    return view('welcome');
 });
 // Route::get('/', function () {
 //     return redirect('/test')->with([
