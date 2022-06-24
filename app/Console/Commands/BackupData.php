@@ -39,54 +39,30 @@ class BackupData extends Command
      */
     public function handle()
     {
-         $path = storage_path('app/public/backup_data.csv');
-         if( filesize($path)==0){
+        $file = fopen($path, "w") or die("Unable to open file!");
+        $columns = array('ID', 'TITLE', 'PRICE','DESCRIPTION','USER_ID','CREARTED_AT','UPDATED_AT','STATUS');
+        fputcsv($file, $columns,',');
+        fclose($file);
 
-            $file = fopen($path, "w") or die("Unable to open file!");
-            $columns = array('ID', 'TITLE', 'PRICE','DESCRIPTION','USER_ID','CREARTED_AT','UPDATED_AT','STATUS');
-            fputcsv($file, $columns,',');
+        DB::table('products')
+            ->orderBy('id')
+            ->chunk(10, function ($products) {
+                $path = storage_path('app/public/backup_data.csv');
+                $file = fopen($path, "w") or die("Unable to open file!");
+                foreach ($products as $product) {
+                        fputcsv($file, [
+                            $product->id,
+                            $product->title,
+                            $product->price,
+                            $product->description,
+                            $product->user_id,
+                            $product->created_at,
+                            $product->updated_at,
+                            $product->status
+                        ]);
+                }
             fclose($file);
-
-            DB::table('products')
-                ->orderBy('id')
-                ->chunk(10, function ($products) {
-                    $path = storage_path('app/public/backup_data.csv');
-                    $file = fopen($path, "w") or die("Unable to open file!");
-                    foreach ($products as $product) {
-                            fputcsv($file, [
-                                $product->id,
-                                $product->title,
-                                $product->price,
-                                $product->description,
-                                $product->user_id,
-                                $product->created_at,
-                                $product->updated_at,
-                                $product->status
-                            ]);
-                    }
-                fclose($file);
-            });
-        }else{
-            DB::table('products')
-                ->orderBy('id')
-                ->chunk(10, function ($products) {
-                    $path = storage_path('app/public/backup_data.csv');
-                    $file = fopen($path, "a") or die("Unable to open file!");
-                    foreach ($products as $product) {
-                            fputcsv($file, [
-                                $product->id,
-                                $product->title,
-                                $product->price,
-                                $product->description,
-                                $product->user_id,
-                                $product->created_at,
-                                $product->updated_at,
-                                $product->status
-                            ]);
-                    }
-                fclose($file);
-            });
-        }
+        });
 
     }
 }
